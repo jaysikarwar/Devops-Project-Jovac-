@@ -1,0 +1,47 @@
+# kibana.yaml
+
+# Kibana Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana
+  labels:
+    app: kibana
+spec:
+  type: NodePort # Exposes Kibana outside the cluster
+  ports:
+  - port: 5601
+    protocol: TCP
+  selector:
+    app: kibana
+---
+# Kibana Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana
+  labels:
+    app: kibana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kibana
+  template:
+    metadata:
+      labels:
+        app: kibana
+    spec:
+      containers:
+      - name: kibana
+        image: docker.elastic.co/kibana/kibana:7.17.9
+        resources:
+          limits:
+            cpu: 1000m
+          requests:
+            cpu: 100m
+        env:
+          - name: ELASTICSEARCH_HOSTS
+            value: http://elasticsearch:9200 # Tells Kibana how to find Elasticsearch
+        ports:
+        - containerPort: 5601
